@@ -9,9 +9,7 @@ using System.Globalization;
 class EntryPoint
 {
     static IWebDriver driver = null;
-    static IWebElement webElement = null;
-
-
+    
     static void Main()
     {
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -45,12 +43,9 @@ class EntryPoint
             WaitForPageLoad(driver, wait);
 
             //Check whether the first selected item is on sale or not
-            webElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable((By.Id("priceblock_ourprice"))));
-            if(webElement.Enabled)    
-                actualPrice = driver.FindElement(By.Id("priceblock_ourprice")).Text;
-            else
-                actualPrice = driver.FindElement(By.Id("priceblock_saleprice")).Text;
 
+            actualPrice= driver.FindElement(By.XPath("//*[@id='priceblock_ourprice'] | //*[@id='priceblock_saleprice']")).Text;
+          
             decimal actualLaptopPrice = Decimal.Parse(actualPrice, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, new CultureInfo("en-US"));
 
             decimal expectedLaptopPrice = Decimal.Parse(expectedPrice, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, new CultureInfo("en-US"));
@@ -60,7 +55,7 @@ class EntryPoint
             //Assertion for the actual price of the selected item with the expected price
             Assert.Greater(actualLaptopPrice, expectedLaptopPrice, "Assertion was not successfull");
 
-            SuccessMessage("Test Passed");
+            SuccessMessage("Test Passed: Actual Price-"+ actualLaptopPrice +" is greater than expected laptop price-"+expectedLaptopPrice);
 
         }
 

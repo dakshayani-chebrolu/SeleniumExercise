@@ -10,6 +10,7 @@ class EntryPoint
 {
     static IWebDriver driver = null;
     
+
     static void Main()
     {
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -28,24 +29,24 @@ class EntryPoint
 
         try
         {
-           
+
             //Navigate to the url
             driver.Navigate().GoToUrl(url);
             WaitForPageLoad(driver, wait);
 
             //get the elements using ID and Xpath
-            driver.FindElement(By.Id("twotabsearchtextbox")).SendKeys("laptop");
+            GetWebElement(By.Id("twotabsearchtextbox")).SendKeys("laptop");
 
-            driver.FindElement(By.Id("nav-search-submit-button")).Click();
+            GetWebElement(By.Id("nav-search-submit-button")).Click();
 
-            driver.FindElement(By.XPath("//div[@data-cel-widget='search_result_0']/descendant::h2/a[contains(@class,'a-text-normal')]")).Click();
+            GetWebElement(By.XPath("//div[@data-cel-widget='search_result_0']/descendant::h2/a[contains(@class,'a-text-normal')]")).Click();
 
             WaitForPageLoad(driver, wait);
 
             //Check whether the first selected item is on sale or not
 
-            actualPrice= driver.FindElement(By.XPath("//*[@id='priceblock_ourprice'] | //*[@id='priceblock_saleprice']")).Text;
-          
+            actualPrice = GetWebElement(By.XPath("//*[@id='priceblock_ourprice'] | //*[@id='priceblock_saleprice']")).Text;
+
             decimal actualLaptopPrice = Decimal.Parse(actualPrice, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, new CultureInfo("en-US"));
 
             decimal expectedLaptopPrice = Decimal.Parse(expectedPrice, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, new CultureInfo("en-US"));
@@ -55,7 +56,7 @@ class EntryPoint
             //Assertion for the actual price of the selected item with the expected price
             Assert.Greater(actualLaptopPrice, expectedLaptopPrice, "Assertion was not successfull");
 
-            SuccessMessage("Test Passed: Actual Price-"+ actualLaptopPrice +" is greater than expected laptop price-"+expectedLaptopPrice);
+            SuccessMessage("Test Passed: Actual Price-" + actualLaptopPrice + " is greater than expected laptop price-" + expectedLaptopPrice);
 
         }
 
@@ -70,7 +71,7 @@ class EntryPoint
             SuccessMessage("Browser closed");
         }
         watch.Stop();
-        
+
         SuccessMessage($"Execution Time: {watch.ElapsedMilliseconds} ms");
 
     }
@@ -97,5 +98,21 @@ class EntryPoint
         Console.ForegroundColor = ConsoleColor.White;
     }
 
+    //Wait till the element is available by ignoring exception 
+    public static IWebElement GetWebElement(By locator)
+    {
+
+        DefaultWait<IWebDriver> fluentWait = new DefaultWait<IWebDriver>(driver);
+        fluentWait.Timeout = TimeSpan.FromSeconds(5);
+        fluentWait.PollingInterval = TimeSpan.FromMilliseconds(400);
+        fluentWait.IgnoreExceptionTypes(typeof(NoSuchElementException));
+        fluentWait.Message = "Element to be searched not found";
+
+        IWebElement element = fluentWait.Until(x => x.FindElement(locator));
+
+        return element;
+    }
 }
+
+
 
